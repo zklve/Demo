@@ -1,9 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
+using Google.Api.Ads.Common.Lib;
 using JwtDemo.Controllers;
+using JwtDemo.Helper;
+using JwtDemo.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,15 +19,26 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace JwtDemo
 {
     public class Startup
     {
+
+        private static string basePath => PlatformServices.Default.Application.ApplicationBasePath;
+        private static string connectString = "";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            var app =  new ConfigHelper().Get<AppConfigSettings>("appsettings");
+            if (app != null)
+            {
+                connectString = app.ConnectionStrings;
+            }
+
         }
 
         public IConfiguration Configuration { get; }
@@ -29,6 +46,7 @@ namespace JwtDemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
 
             //ÃÌº”jwt—È÷§£∫
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -48,6 +66,11 @@ namespace JwtDemo
 
             services.AddControllers();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+        }
+
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
